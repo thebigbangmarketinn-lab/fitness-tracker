@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aesthetic Physique Tracker</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #1a1d24;
+    --card2: #21252e;
+    --accent: #4ade80;
+    --accent2: #38bdf8;
+    --text: #e6e8ec;
+    --muted: #8b91a0;
+    --border: #2b303b;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: 4px; }
+  h2 { font-size: 1.1rem; margin-bottom: 12px; color: var(--accent); }
+  .sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tab {
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+  }
+  .tab.active { background: var(--accent); color: #08210f; font-weight: 600; border-color: var(--accent); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .field { flex: 1; min-width: 120px; margin-bottom: 12px; }
+  label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+  input[type="number"], input[type="date"], input[type="text"] {
+    width: 100%; background: var(--card2); border: 1px solid var(--border);
+    color: var(--text); padding: 9px 10px; border-radius: 8px; font-size: 0.95rem;
+  }
+  .check { display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--card2); border-radius: 8px; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+  button.primary {
+    background: var(--accent); color: #08210f; border: none; padding: 11px 20px;
+    border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem;
+  }
+  button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+  .hidden { display: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .stat { background: var(--card2); border-radius: 10px; padding: 14px; }
+  .stat .num { font-size: 1.4rem; font-weight: 700; color: var(--accent2); }
+  .stat .lbl { font-size: 0.75rem; color: var(--muted); }
+  .day { margin-bottom: 18px; }
+  .day h3 { font-size: 0.95rem; color: var(--accent2); margin-bottom: 6px; }
+  .ex { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 0.88rem; }
+  .ex span:last-child { color: var(--muted); }
+  .pill { display:inline-block; background: var(--card2); border:1px solid var(--border); padding:3px 9px; border-radius:20px; font-size:0.75rem; color:var(--muted); margin:2px; }
+  .bar-wrap { background: var(--card2); border-radius: 6px; height: 8px; overflow: hidden; margin-top: 6px; }
+  .bar { height: 100%; background: var(--accent); border-radius: 6px; transition: width .3s; }
+  .meal { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .meal:last-child { border-bottom: none; }
+  .meal b { color: var(--accent2); }
+  .note { font-size: 0.8rem; color: var(--muted); margin-top: 10px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #08210f; padding: 12px 22px; border-radius: 10px; font-weight: 600; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+  <h1>Aesthetic Physique Tracker</h1>
+  <p class="sub">Goal: lean down to ~76–78 kg, build the V-taper. Data saves automatically in your browser.</p>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="log">Daily Log</div>
+    <div class="tab" data-tab="progress">Progress</div>
+    <div class="tab" data-tab="workout">Workout Plan</div>
+    <div class="tab" data-tab="meal">Meal Plan</div>
+  </div>
+
+  <!-- DAILY LOG -->
+  <section id="log">
+    <div class="card">
+      <h2>Log Today</h2>
+      <div class="row">
+        <div class="field"><label>Date</label><input type="date" id="d-date" /></div>
+        <div class="field"><label>Weight (kg)</label><input type="number" id="d-weight" step="0.1" placeholder="84" /></div>
+        <div class="field"><label>Sleep (hrs)</label><input type="number" id="d-sleep" step="0.5" placeholder="7" /></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Calories</label><input type="number" id="d-cal" placeholder="2100" /></div>
+        <div class="field"><label>Protein (g)</label><input type="number" id="d-protein" placeholder="150" /></div>
+        <div class="field"><label>Steps</label><input type="number" id="d-steps" placeholder="9000" /></div>
+      </div>
+      <div class="row" style="margin-bottom:14px;">
+        <label class="check" style="flex:1;"><input type="checkbox" id="d-creatine" /> Creatine taken (5g)</label>
+        <label class="check" style="flex:1;"><input type="checkbox" id="d-workout" /> Workout done</label>
+      </div>
+      <div class="field"><label>Workout focus (optional)</label><input type="text" id="d-focus" placeholder="Push / Pull / Legs / Rest" /></div>
+      <button class="primary" id="save-day">Save Day</button>
+    </div>
+
+    <div class="card">
+      <h2>Today's Targets</h2>
+      <div id="targets"></div>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section id="progress" class="hidden">
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="stat-grid" id="stats"></div>
+    </div>
+    <div class="card">
+      <h2>History</h2>
+      <div style="overflow-x:auto;">
+        <table id="history">
+          <thead><tr><th>Date</th><th>Wt</th><th>Sleep</th><th>Cal</th><th>Prot</th><th>Steps</th><th>Cr</th><th>WO</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="note" id="empty-note">No entries yet — log your first day above.</p>
+      <div style="margin-top:14px;"><button class="ghost" id="export">Export data (JSON)</button></div>
+    </div>
+  </section>
+
+  <!-- WORKOUT -->
+  <section id="workout" class="hidden">
+    <div class="card">
+      <h2>6-Day Split — Push / Pull / Legs ×2</h2>
+      <p class="note" style="margin-top:0;margin-bottom:14px;">Rule #1: progressive overload — add weight or reps each week. Day 7 = full rest.</p>
+      <div id="plan"></div>
+    </div>
+  </section>
+
+  <!-- MEAL -->
+  <section id="meal" class="hidden">
+    <div class="card">
+      <h2>Sample Day — ~2,100 cal / ~150g protein</h2>
+      <div id="meals"></div>
+      <p class="note">Protein every meal · veggies fill half the plate · carbs around workout · water 3–4 L/day (extra on creatine).</p>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const STORE = "physiqueTracker_v1";
+const TARGETS = { cal: 2100, protein: 150, sleep: 7.5, steps: 9000 };
+
+const WORKOUT = [
+  { day: "Day 1 – Push", ex: [["Bench press","4×6–8"],["Incline DB press","3×8–10"],["Overhead press","3×8–10"],["Lateral raises","3×12–15"],["Triceps pushdown","3×10–12"],["Overhead tri ext","2×12"]] },
+  { day: "Day 2 – Pull", ex: [["Pull-ups / Lat pulldown","4×8–10"],["Barbell/DB row","4×8–10"],["Seated cable row","3×10–12"],["Face pulls","3×15"],["Barbell/DB curls","3×10–12"],["Hammer curls","2×12"]] },
+  { day: "Day 3 – Legs", ex: [["Squats","4×6–8"],["Romanian deadlift","3×8–10"],["Leg press","3×10–12"],["Leg curls","3×12"],["Calf raises","4×15"],["Plank + hanging leg raises","abs"]] },
+  { day: "Day 4 – Push", ex: [["Incline barbell press","4×6–8"],["Flat DB press","3×8–10"],["Arnold press","3×10"],["Cable lateral raises","3×15"],["Skull crushers","3×10–12"],["Rope pushdown","2×15"]] },
+  { day: "Day 5 – Pull", ex: [["Lat pulldown","4×8–10"],["Chest-supported row","4×10"],["Straight-arm pulldown","3×12"],["Rear delt fly","3×15"],["Incline DB curls","3×10–12"],["Cable curls","2×15"]] },
+  { day: "Day 6 – Legs", ex: [["Front squat / Hack squat","4×8–10"],["Deadlift","3×5"],["Walking lunges","3×12/leg"],["Leg extension","3×15"],["Seated calf raise","4×15"],["Cable crunch","3×15"]] },
+  { day: "Day 7 – Rest", ex: [["Full rest + 7–8 hrs sleep","recover"],["Optional easy walk","8–10k steps"]] },
+];
+
+const MEALS = [
+  ["Breakfast","3 whole eggs + 2 whites (or paneer bhurji ~100g), 2 multigrain rotis or 40g oats","~30g protein"],
+  ["Mid-morning","1 cup Greek yogurt / dahi + handful of nuts (or 1 fruit)","~15g protein"],
+  ["Lunch","150g chicken/fish/soya/paneer, 1 cup rice or 2 rotis, dal + salad + veggies","~40g protein"],
+  ["Pre/Post workout","Whey shake (1 scoop) + 5g creatine","~25g protein"],
+  ["Dinner","150g chicken/fish/tofu/paneer, sautéed veggies, 1 roti or small rice, salad","~40g protein"],
+];
+
+function load() { try { return JSON.parse(localStorage.getItem(STORE)) || []; } catch(e){ return []; } }
+function save(d) { localStorage.setItem(STORE, JSON.stringify(d)); }
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800); }
+
+// Tabs
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  ["log","progress","workout","meal"].forEach(s=>document.getElementById(s).classList.add("hidden"));
+  document.getElementById(t.dataset.tab).classList.remove("hidden");
+  if(t.dataset.tab==="progress") renderProgress();
+});
+
+// Default date = today
+document.getElementById("d-date").value = new Date().toISOString().slice(0,10);
+
+// Save day
+document.getElementById("save-day").onclick = () => {
+  const entry = {
+    date: document.getElementById("d-date").value,
+    weight: parseFloat(document.getElementById("d-weight").value)||null,
+    sleep: parseFloat(document.getElementById("d-sleep").value)||null,
+    cal: parseInt(document.getElementById("d-cal").value)||null,
+    protein: parseInt(document.getElementById("d-protein").value)||null,
+    steps: parseInt(document.getElementById("d-steps").value)||null,
+    creatine: document.getElementById("d-creatine").checked,
+    workout: document.getElementById("d-workout").checked,
+    focus: document.getElementById("d-focus").value.trim(),
+  };
+  if(!entry.date){ toast("Pick a date"); return; }
+  let data = load();
+  const i = data.findIndex(e=>e.date===entry.date);
+  if(i>=0) data[i]=entry; else data.push(entry);
+  data.sort((a,b)=>b.date.localeCompare(a.date));
+  save(data);
+  renderTargets();
+  toast("Saved!");
+};
+
+function bar(val, target){
+  const pct = target ? Math.min(100, Math.round((val/target)*100)) : 0;
+  return `<div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>`;
+}
+
+function renderTargets(){
+  const today = document.getElementById("d-date").value;
+  const e = load().find(x=>x.date===today) || {};
+  const el = document.getElementById("targets");
+  el.innerHTML = `
+    <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:.88rem;"><span>Calories</span><span>${e.cal||0} / ${TARGETS.cal}</span></div>${bar(e.cal||0,TARGETS.cal)}</div>
+    <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:.88rem;"><span>Protein (g)</span><span>${e.protein||0} / ${TARGETS.protein}</span></div>${bar(e.protein||0,TARGETS.protein)}</div>
+    <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:.88rem;"><span>Sleep (hrs)</span><span>${e.sleep||0} / ${TARGETS.sleep}</span></div>${bar(e.sleep||0,TARGETS.sleep)}</div>
+    <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:.88rem;"><span>Steps</span><span>${e.steps||0} / ${TARGETS.steps}</span></div>${bar(e.steps||0,TARGETS.steps)}</div>
+    <div style="margin-top:14px;">
+      <span class="pill">${e.creatine?"✓":"⬜"} Creatine</span>
+      <span class="pill">${e.workout?"✓":"⬜"} Workout${e.focus?" · "+e.focus:""}</span>
+    </div>`;
+}
+
+function renderProgress(){
+  const data = load();
+  const stats = document.getElementById("stats");
+  const tbody = document.querySelector("#history tbody");
+  const note = document.getElementById("empty-note");
+  tbody.innerHTML = "";
+  if(!data.length){ note.style.display="block"; stats.innerHTML=""; return; }
+  note.style.display="none";
+
+  const weights = data.filter(e=>e.weight).sort((a,b)=>a.date.localeCompare(b.date));
+  const start = weights[0]?.weight, latest = weights[weights.length-1]?.weight;
+  const change = (start && latest) ? (latest-start).toFixed(1) : "–";
+  const avgSleep = avg(data.map(e=>e.sleep).filter(Boolean));
+  const avgProt = avg(data.map(e=>e.protein).filter(Boolean));
+  const crDays = data.filter(e=>e.creatine).length;
+  const woDays = data.filter(e=>e.workout).length;
+
+  stats.innerHTML = `
+    <div class="stat"><div class="num">${latest??"–"} kg</div><div class="lbl">Current weight</div></div>
+    <div class="stat"><div class="num">${change>0?"+":""}${change} kg</div><div class="lbl">Change since start</div></div>
+    <div class="stat"><div class="num">${avgSleep??"–"} h</div><div class="lbl">Avg sleep</div></div>
+    <div class="stat"><div class="num">${avgProt??"–"} g</div><div class="l
